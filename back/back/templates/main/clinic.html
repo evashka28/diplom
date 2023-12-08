@@ -1,0 +1,222 @@
+   {% extends 'main/styles.html' %}
+{% block title %}
+    Clinic
+{% endblock %}
+
+{% block headcontent %}
+{% load static %}
+        <style>
+        /*Modify*/
+        @media (min-width: 950px){
+            header>div#logo>a>img {
+            margin-left: 15%;
+            }
+            #logo {
+            float: left;
+            width: 30%;
+            }
+            #about {
+                float: left;
+                width: 37%;
+            }
+            #reg_auth {
+            float: right;
+            width: 30%;
+            }
+        }
+
+        @media (max-width: 949px) and (min-width: 525px) {
+            header>div#logo>a>img {
+            margin-left: 15%;
+            }
+            #logo {
+            float: left;
+            width: 50%;
+            }
+            #about {
+                visibility: hidden;
+                display: none;
+            }
+            #reg_auth {
+            float: right;
+            width: 50%;
+            }
+        }
+
+        @media (max-width: 524px) {
+            header>div#logo>a>img {
+            margin-left: 5%;
+            }
+            #logo {
+            float: left;
+            width: 50%;
+            }
+            #about {
+                visibility: hidden;
+                display: none;
+            }
+            #reg_auth {
+            float: right;
+            width: 50%;
+            }
+        }
+
+        /*добавление элементов по центру шапки*/
+        #about {
+            text-align: center;
+            font-size: 1.4em;
+            padding-top: 10px;
+        }
+        #about>a {
+            color: white;
+        }
+        #about>a:hover {
+            color: white;
+            border-bottom: 1px solid silver;
+        }
+        #about>a:last-child {
+            margin-left: 10%;
+        }
+        #reg_auth>a {
+            color: white;
+        }
+        .btn {
+            float: right;
+            margin-right: 3%;
+            margin-top: 7px;
+            border-radius: 5px;
+            padding: 5px 9px;
+            font-size: 1.2em;
+            background-color: #178FFF;
+            text-shadow: #0C0D3D 0 0 2px;
+            color:white;
+        }
+        .btn:hover {
+            margin-top: 9px;
+        }
+        .btn:active {
+            border-bottom: 0;
+            margin-top: 11px;
+        }
+
+        /*Стиль основного контента*/
+        #main {
+            width: 100%;
+            float: left;
+            margin-top: 20px;
+            margin-left: 5%;
+        }
+        .heading {
+            cursor: default;
+            font-weight: lighter;
+            font-size: 1.4em;
+            border-bottom: 2px solid #178FFF;
+            float: left;
+            color: #0C0D3D;
+            padding: 0px 5px;
+        }
+        .heading:first-letter {
+            color: #178FFF;
+        }
+
+        .article {
+            float: left;
+            margin-right: 10%;
+            margin-bottom: 20px;
+            border: 2px solid #178FFF;
+            background-color: white;
+            box-sizing: border-box;
+            max-width: 95%;
+            border-radius: 5px;
+        }
+        .article>img {
+            border-radius: 5px 5px 0 0;
+            width: 20%;
+            height: 20%;
+            display: block;
+            margin: 0 auto;
+        }
+        .article>span {
+            font-size: 1.3em;
+            width: 80%;
+            margin: 7px 10%;
+            float: left;
+            text-align: justify;
+            color: black;
+        }
+
+    </style>
+
+    <div id="reg_auth">
+        {% if request.user.is_authenticated %}
+
+            <li class="last"> <a href="{% url 'logout' %}"><div class="btn">
+                Log out
+            </div></a>
+
+            <a href="/personpage" title="Profile">
+                <div class="btn">
+                    Profile
+                </div>
+            </a>
+            </li>
+        {% else %}
+            <a href="/authorization" title="Log in">
+                <div class="btn">
+                    Log in
+                </div>
+            </a>
+            <a href="/register" title="Sign up">
+                <div class="btn">
+                    Sign up
+                </div>
+            </a>
+        {% endif %}
+
+    </div>
+{% endblock %}
+
+{% block content %}
+{% load static %}
+<div id="main">
+    <div id="news">
+        <h2 class="heading">Important information about our project</h2>
+        <div style="clear:both">
+            <br>
+        </div>
+        <div class="article">
+            <img src="static/logo.png" alt="LOGO" title="LOGO">
+            <span>UC description</span>
+            <span>There are four roles: patient, receptionist, doctor and administrator.</span>
+            <span>The patient logs into his personal account by entering a login and password, after they have access
+to the functions of viewing pages with a medical record and making an appointment.
+Optionally, when viewing records in the medical record, every patient can select a
+specific doctor. On the Appointment Review page, they can cancel an existing
+appointment, freeing up a window in the doctor's appointment schedule, or they can
+make a new appointment. When registering, patients must select the corps, specialist,
+date and time of admission. Additionally, a choice of the method of sending a coupon
+                and a reminder of the reception is implemented.</span>
+<span>The receptionist logs into the system by entering a login and password, after they
+have access to the functions of viewing pages with the schedule of all doctors and
+recording patients for appointments. If desired, when viewing the schedule, they can
+select a specialty and a specific doctor. On the Appointment View page, they can
+cancel an existing appointment, freeing up a window in the doctor's appointment
+schedule, or they can schedule a patient for a new appointment. When registering,
+receptionists must select a specialist, date and time of admission. Additionally, a
+choice of the method of sending a coupon and a reminder of the reception is
+    implemented.</span>
+<span>The doctor logs into his personal account by entering his login and password, and
+they have access to the functions of viewing pages with the schedule of all doctors,
+recording patients for appointments and editing the patient's medical record. When
+viewing the schedule, they can select a specialty and a specific doctor. On the Review
+Appointment page, they can cancel an existing appointment to free up a window in
+your appointment schedule, or they can schedule a patient for a new appointment.
+When registering, doctors must select the date, time of reception, as well as the method
+of sending the coupon and reminder of the appointment. Editing a medical record
+    involves entering new data about the patient's health status.</span>
+<span>The administrator has expanded functionality: additionally implemented the
+ability to edit data, add new users to the system or delete their information.</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

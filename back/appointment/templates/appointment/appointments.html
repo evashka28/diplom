@@ -1,0 +1,89 @@
+{% extends APPOINTMENT_BASE_TEMPLATE %}
+{% load i18n %}
+{% load static %}
+{% block customCSS %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/appointments1.css' %}"/>
+{% endblock %}
+{% block title %}
+    {{ page_title }}
+{% endblock %}
+{% block description %}
+    {{ page_description }}
+{% endblock %}
+{% block body %}
+
+    <div class="main-container">
+        <div class="body-container">
+            <h1 class="page-title">{{ service.name }}</h1>
+            <small class="page-description">
+                {% trans "Выберите удобное время для записи" %}
+            </small>
+            <hr>
+
+            <div class="page-body">
+                <div class="appointment-calendar">
+                    <div class="appointment-calendar-title-timezone">
+                        <div class="title">
+                            {% trans "Выберите дату и время" %}
+                        </div>
+                        <div class="timezone-details">
+                            {% trans "Временная зона" %}:&nbsp;{% trans "Москва" %}
+                        </div>
+                    </div>
+                    <hr class="second-part">
+                    <div class="calendar-and-slot">
+                        <div class="calendar" id="calendar">
+                        </div>
+                        <div class="slot">
+                            <div class="date_chosen">{{ date_chosen }}</div>
+                            <div class="slot-container">
+                                <ul id="slot-list" class="slot-list">
+                                    <!-- Slot list will be updated dynamically by the AJAX request -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="service-description">
+                    <form method="post" action="{% url 'appointment:appointment_request_submit' %}"
+                    class="appointment-form">
+                        {% csrf_token %}
+                        <div>{% trans "Подробности" %}</div>
+                        <hr class="second-part">
+                        <div class="service-description-content">
+                            <p class="item-name">{{ service.name }}</p>
+                            <p id="service-datetime-chosen" class="service-datetime-chosen">{{ date_chosen }}</p>
+                            <p>{{ service.get_duration }} ч</p>
+                            <p>{{ service.price }}руб</p>
+                            <button type="submit" class="btn btn-dark btn-submit-appointment">{% trans 'Далее' %}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block customJS %}
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"
+            integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.min.js"
+            integrity="sha512-1/RvZTcCDEUjY/CypiMz+iqqtaoQfAITmNSJY17Myp4Ms5mdxPS5UV7iOfdZoxcGhzFbOm6sntTKJppjvuhg4g=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.5/index.global.min.js'></script>
+    <script>
+        const locale = "{{ locale }}";
+        const availableSlotsAjaxURL = "{% url 'appointment:available_slots_ajax' %}";
+        const requestNextAvailableSlotURLTemplate = "{% url 'appointment:request_next_available_slot' service_id=0 %}";
+        const serviceId = "{{ service.id }}";
+        const serviceDuration = parseInt("{{ service.duration.total_seconds }}") / 60;
+    </script>
+    <script src="{% static 'js/appointments.js' %}"></script>
+    <script type="module" href="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule href="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+
+{% endblock %}
