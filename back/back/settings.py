@@ -9,13 +9,13 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+ROOT_URLCONF = 'back.urls'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -25,44 +25,48 @@ SECRET_KEY = 'django-insecure-ss_z*b$nku-ci!h#ge_3t%o%_96&+r@e_4l$)@tl0db3jlf&6d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 
 # Application definition
 SHARED_APPS = [
+    # django-tenants app
+    # 'tenant_schemas'
+    'django_tenants',
+    # django apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'shared',
-]
+    # django-tenant-users apps
+    'tenant_users.permissions',
+    'tenant_users.tenants',
+    # Test project apps
 
-INSTALLED_APPS = [
-    'tenant_schemas',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'info',
-    'shared',
+    'back.ashared',
+    'back.uinfo',
+
 ]
 
 TENANT_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'info',
+    'tenant_users.permissions',
+    'back.wtenant',
+    'appointment',
+    'django_messages',
 ]
 
+INSTALLED_APPS = list(SHARED_APPS) + [
+    app for app in TENANT_APPS if app not in SHARED_APPS
+]
+
+
 MIDDLEWARE = [
-    'tenant_schemas.middleware.TenantMiddleware',
+    'django_tenants.middleware.main.TenantMainMiddleware',
+    # 'tenant_schemas.middleware.TenantMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -72,12 +76,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'back.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'back/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -98,7 +101,7 @@ WSGI_APPLICATION = 'back.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'tenant_schemas.postgresql_backend',
+        'ENGINE': 'django_tenants.postgresql_backend',
         'NAME': 'diploma',
         'USER': 'postgres',
         'PASSWORD': 'vinnikova',
@@ -108,31 +111,18 @@ DATABASES = {
 }
 
 DATABASE_ROUTERS = {
-    'tenant_schemas.routers.TenantSyncRouter',
+        'django_tenants.routers.TenantSyncRouter',
+        # 'tenant_schemas.routers.TenantSyncRouter',
 }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+AUTH_PASSWORD_VALIDATORS = []
 
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -147,11 +137,26 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/back/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-TENANT_MODEL = "shared.Client"
+
+APPOINTMENT_CLIENT_MODEL ='uinfo.TenantUser'
+# django-tenant-users settings
+TENANT_USERS_DOMAIN = 'localhost'
+AUTHENTICATION_BACKENDS = ('tenant_users.permissions.backend.UserBackend',)
+AUTH_USER_MODEL = 'uinfo.TenantUser'
+
+# django-tenants settings
+TENANT_MODEL = "ashared.Client"
+TENANT_DOMAIN_MODEL = "ashared.Domain"
+
+
+STATICFILES_DIRS=[
+    os.path.join(BASE_DIR, 'back/static'),
+]
+

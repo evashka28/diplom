@@ -1,5 +1,17 @@
 from django.db import models
 
+from tenant_users.tenants.models import UserProfile
+
+_NameFieldLength = 64
+
+
+class TenantUser(UserProfile):
+    """Simple user model definition for testing."""
+
+    name = models.CharField(max_length=_NameFieldLength, blank=True)
+
+
+'''
 class Doctor(models.Model):
 
     #doc_id = models.AutoField(primary_key=True)
@@ -30,7 +42,7 @@ class Patient(models.Model):
     surname = models.CharField(max_length=255, verbose_name=u"surname", blank=True)
     phone_number = models.CharField(max_length=255, verbose_name=u"mobile", null=True, blank=True)
     birth = models.DateField(max_length=255, verbose_name=u"bithday", blank=True, null=True)
-    #user_id = models.OneToOneField(User, on_delete = models.CASCADE, primary_key = True)
+    user_id = models.OneToOneField(TenantUser, on_delete = models.CASCADE, primary_key = True)
 
     def __str__(self):
         return self.name
@@ -57,7 +69,6 @@ class Appointment(models.Model):
     doctor_id = models.ForeignKey(Doctor, on_delete=models.CASCADE)
     time = models.DateTimeField()
 
-    def __int__(self):
-        return self.id
 
 
+'''
