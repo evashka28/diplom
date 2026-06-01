@@ -1,9 +1,170 @@
-# Counseling Service Platform for Providing Psychological Support
+# Платформа психологического консультирования
 
-  The platform is a service designed to facilitate interaction between a psychologist and a client. Upon accessing the website, the client gains the ability to book an online appointment with their psychologist. They can select a convenient time slot and immediately pay for the session. The platform also allows for rescheduling or canceling appointments. Additionally, the service sends reminders about upcoming sessions.
-  
-  The platform offers a variety of useful resources, including articles, videos, and other materials. Under the "Practice" section, clients can access tools to track their emotional states, such as an emotion diary, as well as templates for various psychological exercises. There is also a direct communication button to contact the psychologist, ensuring that clients can reach out with questions or concerns about unfamiliar situations or emotional states.
-  
-  For psychologists, the platform stores all client-related information. Documents created during each session are organized in one place and sorted by date, allowing the psychologist to easily review notes from previous sessions, even those from 10 sessions ago. Psychologists can set their own schedules, and clients can only book available time slots. The platform also includes a chat feature for ongoing communication with clients, as well as the ability to review and provide feedback on practical assignments.
+Веб-приложение для организации работы психолога с клиентами. Проект помогает клиенту записаться на консультацию, выбрать свободное время, оставить контактные данные и общаться со специалистом через внутренние сообщения. Для психолога предусмотрены страницы с клиентами, записями и рабочей информацией.
 
-Full document https://drive.google.com/file/d/1YUG0H1qAhclw7Q9JtHmqkIHRwLaLvhYT/view?usp=sharing
+Проект реализован как Django-приложение с поддержкой multi-tenant архитектуры через `django-tenants`: общие данные хранятся в публичной схеме, а клиентские данные могут разделяться по tenant-схемам.
+
+## Возможности
+
+- регистрация и авторизация пользователей;
+- разделение пользовательских сценариев для клиента и психолога;
+- создание услуг консультаций с длительностью, ценой и описанием;
+- выбор даты и свободного временного слота для записи;
+- оформление заявки на консультацию;
+- хранение записей на прием и информации об оплате;
+- отправка email-уведомлений после записи;
+- внутренние сообщения между пользователями;
+- административная панель Django для управления данными;
+- поддержка tenant-доменов и tenant-пользователей.
+
+## Технологии
+
+- Python 3.7
+- Django 3.2.18
+- PostgreSQL
+- django-tenants
+- Pillow
+- psycopg2-binary
+- six
+
+Реальные runtime-зависимости зафиксированы в `requirements.txt` по импортам и используемым возможностям проекта. Модуль `tenant_users` находится прямо в репозитории в папке `back/tenant_users`.
+
+## Структура проекта
+
+```text
+.
+├── back/
+│   ├── manage.py
+│   ├── appointment/          # Запись на консультации, услуги, слоты, email
+│   ├── back/                 # Основной Django-проект, настройки и URL-ы
+│   │   ├── ashared/          # Общие tenant-модели: клиент и домен
+│   │   ├── uinfo/            # Пользовательская модель и пользовательские страницы
+│   │   └── wtenant/          # Tenant-часть пользовательских данных
+│   ├── django_messages/      # Внутренние сообщения пользователей
+│   └── tenant_users/         # Локальная копия логики tenant-пользователей
+├── .gitignore
+├── env.example
+├── requirements.txt
+└── README.md
+```
+
+## Основные приложения
+
+### `appointment`
+
+Отвечает за запись на консультации. В приложении описаны:
+
+- `Service` — услуга консультации с названием, описанием, длительностью и ценой;
+- `AppointmentRequest` — выбранная дата, время и услуга;
+- `Appointment` — подтвержденная запись клиента;
+- `Config` — настройки рабочего дня и длительности слотов;
+- `PaymentInfo` — информация для оплаты записи.
+
+### `back.uinfo`
+
+Содержит пользовательскую модель `TenantUser` и страницы для регистрации, авторизации, профиля, клиентов, записей и медицинских записей.
+
+### `back.ashared`
+
+Содержит общие tenant-модели:
+
+- `Client` — tenant-клиент;
+- `Domain` — домен tenant-а.
+
+### `django_messages`
+
+Модуль личных сообщений: входящие, исходящие, создание сообщений, ответы, удаление и корзина.
+
+## Настройка окружения
+
+Создайте виртуальное окружение:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Установите зависимости:
+
+```bash
+pip install -r requirements.txt
+```
+
+## Переменные окружения
+
+В репозитории нет настоящего `.env`, и сейчас он не отслеживается git. Это правильно: в `.env` обычно хранятся локальные пароли, секретные ключи и настройки базы данных.
+
+В проект добавлен безопасный шаблон `env.example`. Его можно использовать как подсказку для локального `.env`:
+
+```bash
+cp env.example .env
+```
+
+> Текущая версия `back/back/settings.py` пока использует значения, прописанные прямо в файле настроек. Поэтому `env.example` сейчас документирует нужные переменные и подготавливает проект к выносу секретов из кода.
+
+## Настройка базы данных
+
+Проект настроен на PostgreSQL. Текущие параметры подключения находятся в `back/back/settings.py`:
+
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django_tenants.postgresql_backend',
+        'NAME': 'diploma',
+        'USER': 'postgres',
+        'PASSWORD': 'vinnikova',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+    }
+}
+```
+
+Для локального запуска нужна база данных `diploma` и пользователь PostgreSQL с доступом к ней.
+
+## Запуск проекта
+
+Перейдите в папку Django-проекта:
+
+```bash
+cd back
+```
+
+Примените миграции:
+
+```bash
+python manage.py migrate
+```
+
+Запустите сервер разработки:
+
+```bash
+python manage.py runserver
+```
+
+После запуска приложение будет доступно по адресу:
+
+```text
+http://127.0.0.1:8000/
+```
+
+## Основные маршруты
+
+- `/` — авторизация;
+- `/register` — регистрация;
+- `/logout/` — выход;
+- `/client` — раздел клиента;
+- `/psyholog` — раздел психолога;
+- `/clinic` — страница клиники;
+- `/personpage` — личная страница;
+- `/appointment/request/<service_id>/` — запись на консультацию;
+- `/appointment/ajax/available_slots/` — AJAX-запрос свободных слотов;
+- `/messages/` — внутренние сообщения;
+- `/admin/` — административная панель Django.
+
+## Важные замечания
+
+- В репозитории больше не должны попадать `.venv/`, `.idea/`, `.env`, `db.sqlite3`, `__pycache__/` и другие локальные файлы: они указаны в корневом `.gitignore`.
+- Проверка истории показала, что `.env` в git не попадал. В истории были файлы `.venv`, но они уже удалены из текущего состояния репозитория отдельным коммитом.
+- В текущих настройках проекта есть локальные значения `SECRET_KEY`, `DEBUG`, параметры базы данных и пароль. Для публичного репозитория лучше вынести их в `.env`.
+- Для воспроизводимой установки добавлен `requirements.txt` с реальными runtime-зависимостями проекта. Транзитивные зависимости Django (`asgiref`, `pytz`, `sqlparse`) устанавливаются автоматически.
+- В проекте используется PostgreSQL и tenant-архитектура, поэтому запуск может потребовать дополнительной настройки схем и доменов tenant-ов.
